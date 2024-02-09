@@ -1,5 +1,6 @@
 import { title, subtitle } from "@/components/primitives";
 import { Button } from "@nextui-org/button";
+import {Link} from "@nextui-org/link";
 
 export default function Home() {
 	return (
@@ -8,7 +9,6 @@ export default function Home() {
 				<h1 className={`${title({ color: "blue" })} border-b-4 border-blue-500`}>
 					Caretaker&nbsp;
 				</h1>
-				
 				<br />
 				<br />
 				<h1 className={title({size: "sm"})}>
@@ -20,8 +20,13 @@ export default function Home() {
 			
 
 			<div className="mt-4">
-				<Button className="m-2" color="primary" size="lg"> Register </Button>
-				<Button color="primary" size="lg">Login</Button>
+				<Link href="/register">
+					<Button className="m-2" color="primary" size="lg"> Register </Button>
+				</Link>
+				
+				<Link href='/login'>
+					<Button color="primary" size="lg">Login</Button>
+				</Link>
 			</div>
 		</section>
 	);

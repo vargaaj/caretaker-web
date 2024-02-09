@@ -1,6 +1,7 @@
 import { title, subtitle } from "@/components/primitives";
-import { Button, ButtonGroup } from "@nextui-org/button";
+import { Button } from "@nextui-org/button";
 import { Tooltip } from "@nextui-org/tooltip";
+import { Link } from "@nextui-org/link";
 
 
 export default function Manage() {
@@ -12,9 +13,12 @@ export default function Manage() {
         
         <div className="flex flex-col items-cent justify-center gap-4 mt-4">
           <Tooltip content='Configure initial classrooms' placement="right">
+            <Link href='/manage/configure'>
               <Button color="primary" size="lg">
                 Configure Classrooms
-              </Button>
+              </Button> 
+            </Link>
+              
             </Tooltip>
             <Tooltip content='View classrooms after initial creation' placement="right">
               <Button color="primary" size="lg">
@@ -27,10 +31,6 @@ export default function Manage() {
               </Button>
             </Tooltip>
         </div>
-        
-          
-        
-        
 		</section>
 	);
 }
