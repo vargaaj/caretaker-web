@@ -1,14 +1,14 @@
-import NextAuth from 'next-auth';
-import CredentialsProvider from 'next-auth/providers/credentials';
-import { compare } from 'bcrypt';
-import { sql } from '@vercel/postgres';
+import NextAuth from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { compare } from "bcrypt";
+import { sql } from "@vercel/postgres";
 
 const handler = NextAuth({
   session: {
-    strategy: 'jwt',
+    strategy: "jwt",
   },
   pages: {
-    signIn: '/login',
+    signIn: "/login",
   },
   providers: [
     CredentialsProvider({
@@ -18,17 +18,15 @@ const handler = NextAuth({
       },
       async authorize(credentials, req) {
         //
-        console.log({ credentials })
+
         const response = await sql`
         SELECT * FROM users WHERE email=${credentials?.email}`;
         const user = response.rows[0];
 
         const passwordCorrect = await compare(
-          credentials?.password || '',
+          credentials?.password || "",
           user.password
         );
-
-        console.log({ passwordCorrect });
 
         if (passwordCorrect) {
           return {
