@@ -2,7 +2,8 @@ import { title, subtitle } from "@/components/primitives";
 import { Button } from "@nextui-org/button";
 import {Link} from "@nextui-org/link";
 
-export default function Home() {
+
+export default async function Home() {
 	return (
 		<section className="flex flex-col items-center justify-center mt-20 gap-4 py-8 md:py-10">
 			<div className="inline-block max-w-lg text-center justify-center">
