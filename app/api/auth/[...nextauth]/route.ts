@@ -17,8 +17,6 @@ const handler = NextAuth({
         password: {},
       },
       async authorize(credentials, req) {
-        //
-
         const response = await sql`
         SELECT * FROM users WHERE email=${credentials?.email}`;
         const user = response.rows[0];
@@ -39,6 +37,7 @@ const handler = NextAuth({
       },
     }),
   ],
+  secret: process.env.NEXTAUTH_SECRET,
 });
 
 export { handler as GET, handler as POST };
