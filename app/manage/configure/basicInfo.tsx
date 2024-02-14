@@ -3,7 +3,7 @@ import { title } from "@/components/primitives";
 import { Button } from "@nextui-org/button";
 import { Card, CardBody } from "@nextui-org/card";
 import { Input } from "@nextui-org/input";
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function BasicInfo() {
@@ -36,7 +36,8 @@ export default function BasicInfo() {
     return !isNaN(parsed) && parsed >= 0 && parsed < 30;
   };
 
-  const handleSave = () => {
+  const handleSave = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     // Check if timeframeValue and classroomNumber are empty
     const isTimeframeEmpty = !timeframeValue || timeframeValue.trim() === "";
     const isClassroomNumberEmpty =
@@ -60,9 +61,14 @@ export default function BasicInfo() {
       // Add your actual save logic here
 
       // need to add some route logic here
-      router.push(
-        `/manage/configure/details?timeframe=${timeframeValue}&classroomNumber=${classroomNumber}`
-      );
+      const formData = new FormData(e.currentTarget);
+      const response = await fetch(`/api/manage/configure`, {
+        method: "POST",
+        body: JSON.stringify({
+          timeframe: formData.get("timeframe"),
+          classrooms: formData.get("classrooms"),
+        }),
+      });
     }
   };
 
@@ -72,40 +78,44 @@ export default function BasicInfo() {
         <h1 className={title()}>Basic class information</h1>
       </div>
       <Card className="w-1/2">
-        <CardBody className="p-5 flex flex-col">
-          <h4 className="pb-2 pl-1">Latest Timeframe</h4>
+        <form onSubmit={handleSave}>
+          <CardBody className="p-5 flex flex-col">
+            <h4 className="pb-2 pl-1">Latest Timeframe</h4>
 
-          <Input
-            value={timeframeValue}
-            placeholder="August-November"
-            variant="bordered"
-            errorMessage={
-              isTimeframeInvalid && "Please enter a valid timeframe"
-            }
-            onValueChange={setTimeframeValue}
-            isRequired={true}
-          />
+            <Input
+              name="timeframe"
+              value={timeframeValue}
+              placeholder="August-November"
+              variant="bordered"
+              errorMessage={
+                isTimeframeInvalid && "Please enter a valid timeframe"
+              }
+              onValueChange={setTimeframeValue}
+              isRequired={true}
+            />
 
-          <h4 className="pb-2 pl-1">Total Number of Classrooms</h4>
+            <h4 className="pb-2 pl-1">Total Number of Classrooms</h4>
 
-          <Input
-            value={classroomNumber}
-            placeholder="7"
-            variant="bordered"
-            // Remove isInvalid and color props
-            errorMessage={
-              isClassroomNumberInvalid && "Please enter a number (0-29)"
-            }
-            onValueChange={setClassroomNumber}
-            isRequired={true}
-          />
+            <Input
+              name="classrooms"
+              value={classroomNumber}
+              placeholder="7"
+              variant="bordered"
+              // Remove isInvalid and color props
+              errorMessage={
+                isClassroomNumberInvalid && "Please enter a number (0-29)"
+              }
+              onValueChange={setClassroomNumber}
+              isRequired={true}
+            />
 
-          <div className="flex">
-            <Button className="m-1" color="primary" onClick={handleSave}>
-              Save
-            </Button>
-          </div>
-        </CardBody>
+            <div className="flex">
+              <Button className="m-1" type="submit" color="primary">
+                Save
+              </Button>
+            </div>
+          </CardBody>
+        </form>
       </Card>
     </section>
   );

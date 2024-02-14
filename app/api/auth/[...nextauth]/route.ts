@@ -17,8 +17,6 @@ const handler = NextAuth({
         password: {},
       },
       async authorize(credentials, req) {
-        //
-
         const response = await sql`
         SELECT * FROM users WHERE email=${credentials?.email}`;
         const user = response.rows[0];
