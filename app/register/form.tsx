@@ -27,7 +27,8 @@ export default function Form() {
     const isPasswordEmpty = password.trim() === "";
 
     const isEmailEmpty = email.trim() === "";
-
+    console.log(email);
+    console.log(password);
     if (isPasswordEmpty || isEmailEmpty) {
       alert("Please enter a username and password");
       return;
@@ -76,11 +77,13 @@ export default function Form() {
             <h4 className="pb-2 pl-1">Password</h4>
 
             <Input
+              value={password}
               name="password"
               type="password"
               placeholder="Enter a password"
               variant="bordered"
               className="pb-5"
+              onValueChange={setPassword}
             />
 
             <Button type="submit" color="primary" fullWidth={true}>
