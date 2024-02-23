@@ -16,7 +16,7 @@ export default function BasicInfo() {
   const [isClassroomNumberInvalid, setIsClassroomNumberInvalid] =
     useState(false); // Track classroom number validation state
 
-  const validateTimeframe = (value: string) => {
+  const validateTimeframe = (value: string | undefined) => {
     if (value === undefined) {
       return false;
     }
@@ -28,8 +28,8 @@ export default function BasicInfo() {
     return matchesRegex; // Return true only if both conditions are met
   };
 
-  const validateClassroomNumber = (value: string) => {
-    if (value === " ") {
+  const validateClassroomNumber = (value: string | undefined) => {
+    if (value === undefined) {
       return false;
     }
     const parsed = parseInt(value);
@@ -38,38 +38,33 @@ export default function BasicInfo() {
 
   const handleSave = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Check if timeframeValue and classroomNumber are empty
-    const isTimeframeEmpty = !timeframeValue || timeframeValue.trim() === "";
-    const isClassroomNumberEmpty =
-      !classroomNumber || classroomNumber.trim() === "";
 
-    setIsTimeframeInvalid(
-      isTimeframeEmpty || !validateTimeframe(timeframeValue)
-    );
-    setIsClassroomNumberInvalid(
-      isClassroomNumberEmpty || !validateClassroomNumber(classroomNumber)
-    );
-
-    if (
-      !isTimeframeEmpty &&
-      !isClassroomNumberEmpty &&
-      !isTimeframeInvalid &&
-      !isClassroomNumberInvalid
-    ) {
-      // Both inputs are valid, proceed with saving
-
-      // Add your actual save logic here
-
-      // need to add some route logic here
-      const formData = new FormData(e.currentTarget);
-      const response = await fetch(`/api/manage/configure`, {
-        method: "POST",
-        body: JSON.stringify({
-          timeframe: formData.get("timeframe"),
-          classrooms: formData.get("classrooms"),
-        }),
-      });
+    if (!validateTimeframe(timeframeValue)) {
+      setIsTimeframeInvalid(true);
+      return;
+    } else {
+      setIsTimeframeInvalid(false);
     }
+
+    if (!validateClassroomNumber(classroomNumber)) {
+      setIsClassroomNumberInvalid(true);
+      return;
+    } else {
+      setIsClassroomNumberInvalid(false);
+    }
+
+    // need to add some route logic here
+    const formData = new FormData(e.currentTarget);
+    const response = await fetch(`/api/manage/configure`, {
+      method: "POST",
+      body: JSON.stringify({
+        timeframe: formData.get("timeframe"),
+        classrooms: formData.get("classrooms"),
+      }),
+    });
+
+    router.push("/manage/configure/details");
+    router.refresh();
   };
 
   return (
@@ -85,13 +80,13 @@ export default function BasicInfo() {
             <Input
               name="timeframe"
               value={timeframeValue}
-              placeholder="August-November"
+              label="Ex: August-November"
               variant="bordered"
               errorMessage={
                 isTimeframeInvalid && "Please enter a valid timeframe"
               }
               onValueChange={setTimeframeValue}
-              isRequired={true}
+              isRequired
             />
 
             <h4 className="pb-2 pl-1">Total Number of Classrooms</h4>
@@ -99,14 +94,13 @@ export default function BasicInfo() {
             <Input
               name="classrooms"
               value={classroomNumber}
-              placeholder="7"
+              label="Ex: 7"
               variant="bordered"
-              // Remove isInvalid and color props
               errorMessage={
                 isClassroomNumberInvalid && "Please enter a number (0-29)"
               }
               onValueChange={setClassroomNumber}
-              isRequired={true}
+              isRequired
             />
 
             <div className="flex">
