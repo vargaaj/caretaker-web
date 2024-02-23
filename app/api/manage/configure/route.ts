@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { hash } from "bcrypt";
 import { sql } from "@vercel/postgres";
 import { getServerSession } from "next-auth";
 
@@ -15,7 +14,9 @@ export async function POST(request: Request) {
         SET Timeframe = ${timeframe}, Total_classrooms = ${num_classrooms}
         WHERE Email = ${server?.user?.email}
     `;
-  } catch (e) {}
+  } catch (e) {
+    ("User not found");
+  }
 
   return NextResponse.json({ message: "success" });
 }
