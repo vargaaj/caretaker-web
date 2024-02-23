@@ -13,10 +13,9 @@ export async function POST(request: Request) {
         const ageRange = list[2];
         const size = list[3];
         await client.sql`
-      INSERT INTO classroomdetails (User_id, Name, Age_range, Size)
-      VALUES (${id}, ${name}, ${ageRange}, ${size})
-    `;
-        // Use these values for your database insertion or other operations
+          INSERT INTO classroomdetails (User_id, Name, Age_range, Size)
+          VALUES (${id}, ${name}, ${ageRange}, ${size});
+        `;
       }
     } catch (e) {}
   } catch (e) {}

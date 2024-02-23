@@ -3,28 +3,27 @@ import { redirect } from "next/navigation";
 import { sql } from "@vercel/postgres";
 
 export default async function UploadPage() {
+  // ADD BELOW CODE TO VIEW CLASSROOMS PAGE
+  // JUST WANTED TO TEST SQL QUERY HERE
+  // const session = await getServerSession();
+  // const userEmail = session?.user?.email;
+  // if (!session) {
+  //   redirect("/");
+  // }
+  // try {
+  //   const response = await sql`
+  //     SELECT * FROM classroomdetails
+  //     WHERE User_id = (SELECT Id FROM users WHERE Email = ${userEmail});
+  // `;
+  //   console.log(response.rows);
+
+  //   return <div>hello</div>;
+  // } catch (e) {
+  //   ("User not found");
+  // }
   const session = await getServerSession();
-  const userEmail = session?.user?.email;
   if (!session) {
     redirect("/");
   }
-  try {
-    const response = await sql`
-        WITH User_Id_CTE AS (
-            SELECT Id
-            FROM users
-            WHERE email = ${userEmail}
-        )
-        SELECT *
-        FROM classroomdetails
-        WHERE User_id IN (SELECT Id FROM User_Id_CTE);
-    `;
-    let classDetails = new Array();
-    const classroomDetails = response.rows[0].classroom_details;
-    console.log(classroomDetails);
-
-    return <div>hello</div>;
-  } catch (e) {
-    ("User not found");
-  }
+  return <div>hello</div>;
 }

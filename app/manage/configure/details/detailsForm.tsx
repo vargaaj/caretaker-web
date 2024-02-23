@@ -6,13 +6,6 @@ import { title, subtitle } from "@/components/primitives";
 import { Button } from "@nextui-org/button";
 import { useRouter } from "next/navigation";
 
-// interface FormData {
-//   name: string;
-//   values: {
-//     ageRange: string;
-//     size: string;
-//   };
-// }
 
 export default function DetailsForm({
   totalClassrooms,
@@ -21,36 +14,37 @@ export default function DetailsForm({
   totalClassrooms: number;
   id: number;
 }) {
-  // const initialFormData: FormData[] = Array(totalClassrooms).fill({
-  //   name: "",
-  //   values: {
-  //     ageRange: "",
-  //     size: "",
-  //   },
-  // });
-
+  
   const router = useRouter();
-  // const [formData, setFormData] = useState<FormData[]>(initialFormData);
   const [names, setNames] = useState(Array(totalClassrooms).fill("")); // Initialize with 11 empty strings
   const [ageRanges, setAgeRanges] = useState(Array(totalClassrooms).fill("")); // Initialize with 11 empty strings
   const [sizes, setSizes] = useState(Array(totalClassrooms).fill("")); // Initialize with 11 empty strings
 
+  const ageRangeRegex = /^(\d+)-(\d+)$/
+  const sizeRegex = /^(?:[1-9]|[1-3][0-9]|40)$/;
+
+  const isValidAgeRange = (ageRange: string) => {
+    const match = ageRange.match(ageRangeRegex);
+    if (match) {
+      const firstNumber = parseInt(match[1], 10);
+      const secondNumber = parseInt(match[2], 10);
+      return secondNumber > firstNumber;
+    } else {
+      return false;
+    }
+  }
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); // Prevent default form submission behavior
-    console.log(names);
+    e.preventDefault(); // Prevent default form submission behavior;
     let dataList: (string | number)[][] = new Array(); // Initialize an empty array
 
     for (let i = 0; i < totalClassrooms; i++) {
-      // Do something in each iteration
-
       let name = names[i];
       let age = ageRanges[i];
       let size = sizes[i];
       dataList.push([id, name, age, size]);
     }
-    console.log(dataList);
     try {
-      // console.log(formData);
       const response = await fetch(`/api/manage/configure/details`, {
         method: "POST",
         headers: {
@@ -59,17 +53,12 @@ export default function DetailsForm({
         body: JSON.stringify({ formBody: dataList }), // Send the entire formData here
       });
 
-      // router.push("/manage/configure/details/upload");
-      // router.refresh();
+      router.push("/manage/configure/details/upload");
+      router.refresh();
     } catch {}
   };
 
   const handleNameChange = (rowIndex: number, newValue: string) => {
-    // setFormData((prev) =>
-    //   prev.map((item, index) =>
-    //     index === rowIndex ? { ...item, name: newValue } : item
-    //   )
-    // );
     setNames((prevNames) => {
       const updatedNames = [...prevNames];
       updatedNames[rowIndex] = newValue;
@@ -78,13 +67,6 @@ export default function DetailsForm({
   };
 
   const handleAgeRangeChange = (rowIndex: number, newValue: string) => {
-    // setFormData((prev) =>
-    //   prev.map((item, index) =>
-    //     index === rowIndex
-    //       ? { ...item, values: { ...item.values, ageRange: newValue } }
-    //       : item
-    //   )
-    // );
     setAgeRanges((prevAgeRanges) => {
       const updatedAgeRanges = [...prevAgeRanges];
       updatedAgeRanges[rowIndex] = newValue;
@@ -93,21 +75,12 @@ export default function DetailsForm({
   };
 
   const handleSizeChange = (rowIndex: number, newValue: string) => {
-    // setFormData((prev) =>
-    //   prev.map((item, index) =>
-    //     index === rowIndex
-    //       ? { ...item, values: { ...item.values, size: newValue } }
-    //       : item
-    //   )
-    // );
     setSizes((prevSizes) => {
       const updatedSizes = [...prevSizes];
       updatedSizes[rowIndex] = newValue;
       return updatedSizes;
     });
   };
-
-  // ... other functions for handling data submission and saving
 
   return (
     <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-1">
@@ -147,6 +120,7 @@ export default function DetailsForm({
                     name={`age${rowIndex}`}
                     label="Ex: 12-20"
                     value={ageRanges[rowIndex]}
+                    errorMessage={!isValidAgeRange(ageRanges[rowIndex]) && "Please enter a valid age range"}
                     onChange={(e) =>
                       handleAgeRangeChange(rowIndex, e.target.value)
                     }
@@ -156,6 +130,7 @@ export default function DetailsForm({
                     isRequired
                     name={`age${rowIndex}`}
                     value={ageRanges[rowIndex]}
+                    errorMessage={!isValidAgeRange(ageRanges[rowIndex]) && "Please enter a valid age range"}
                     onChange={(e) =>
                       handleAgeRangeChange(rowIndex, e.target.value)
                     }
@@ -168,6 +143,7 @@ export default function DetailsForm({
                     name={`size${rowIndex}`}
                     label="Ex: 7"
                     value={sizes[rowIndex]}
+                    errorMessage={!sizeRegex.test(sizes[rowIndex]) && "Please enter a valid size"}
                     onChange={(e) => handleSizeChange(rowIndex, e.target.value)}
                   />
                 ) : (
@@ -175,6 +151,7 @@ export default function DetailsForm({
                     isRequired
                     name={`size${rowIndex}`}
                     value={sizes[rowIndex]}
+                    errorMessage={!sizeRegex.test(sizes[rowIndex]) && "Please enter a valid size"}
                     onChange={(e) => handleSizeChange(rowIndex, e.target.value)}
                   />
                 )}
