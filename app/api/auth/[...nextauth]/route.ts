@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcrypt";
 import { sql } from "@vercel/postgres";
+import { User } from "next-auth/core/types";
 
 const handler = NextAuth({
   session: {
@@ -29,7 +30,7 @@ const handler = NextAuth({
         if (passwordCorrect) {
           return {
             id: user.id,
-            email: user.email,
+            role: user.role,
           };
         }
 
@@ -37,6 +38,28 @@ const handler = NextAuth({
       },
     }),
   ],
+  callbacks: {
+    async jwt({ token, user, session }) {
+      if (user) {
+        return {
+          ...token,
+          id: user.id,
+          role: user.role,
+        };
+      }
+      return token;
+    },
+    async session({ session, token, user }) {
+      return {
+        ...session,
+        user: {
+          id: token.id,
+          email: token.email,
+          role: token.role,
+        },
+      };
+    },
+  },
 });
 
 export { handler as GET, handler as POST };

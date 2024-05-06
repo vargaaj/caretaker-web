@@ -1,11 +1,11 @@
+import Config from "./configuration";
 import { getServerSession } from "next-auth";
-import BasicInfo from "./basicInfo";
-import { redirect } from "next/navigation";
+import { redirect } from "next/navigation"; // Import the redirect function from the correct module
 
 export default async function ConfigurePage() {
   const session = await getServerSession();
   if (!session) {
-    redirect("/");
+    redirect("/"); // Call the redirect function correctly
   }
-  return <BasicInfo />;
+  return <Config />;
 }

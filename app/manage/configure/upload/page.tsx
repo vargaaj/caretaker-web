@@ -1,15 +1,17 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { sql } from "@vercel/postgres";
+import MyDropzone from "./uploadZone";
 
 export default async function UploadPage() {
   // ADD BELOW CODE TO VIEW CLASSROOMS PAGE
   // JUST WANTED TO TEST SQL QUERY HERE
-  // const session = await getServerSession();
-  // const userEmail = session?.user?.email;
-  // if (!session) {
-  //   redirect("/");
-  // }
+  const session = await getServerSession();
+  const userEmail = session?.user?.email;
+  if (!session) {
+    redirect("/");
+  }
+
   // try {
   //   const response = await sql`
   //     SELECT * FROM classroomdetails
@@ -21,9 +23,9 @@ export default async function UploadPage() {
   // } catch (e) {
   //   ("User not found");
   // }
-  const session = await getServerSession();
-  if (!session) {
-    redirect("/");
-  }
-  return <div>hello</div>;
+  // // const session = await getServerSession();
+  // if (!session) {
+  //   redirect("/");
+  // }
+  return <MyDropzone />;
 }

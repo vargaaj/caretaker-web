@@ -1,26 +1,22 @@
 "use client";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { Card, CardBody } from "@nextui-org/card";
 import { Input } from "@nextui-org/input";
 import { title, subtitle } from "@/components/primitives";
 import { Button } from "@nextui-org/button";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
-
-export default function DetailsForm({
-  totalClassrooms,
-  id,
-}: {
+interface ClassroomTableProps {
   totalClassrooms: number;
-  id: number;
-}) {
-  
-  const router = useRouter();
-  const [names, setNames] = useState(Array(totalClassrooms).fill("")); // Initialize with 11 empty strings
-  const [ageRanges, setAgeRanges] = useState(Array(totalClassrooms).fill("")); // Initialize with 11 empty strings
-  const [sizes, setSizes] = useState(Array(totalClassrooms).fill("")); // Initialize with 11 empty strings
+}
 
-  const ageRangeRegex = /^(\d+)-(\d+)$/
+export default function ClassroomTable({
+  totalClassrooms,
+}: ClassroomTableProps): JSX.Element {
+  const router = useRouter();
+  const { data: session } = useSession();
+  const ageRangeRegex = /^(\d+)-(\d+)$/;
   const sizeRegex = /^(?:[1-9]|[1-3][0-9]|40)$/;
 
   const isValidAgeRange = (ageRange: string) => {
@@ -32,17 +28,29 @@ export default function DetailsForm({
     } else {
       return false;
     }
-  }
+  };
+
+  // const isValidClassSize = (classSize: string) => {
+  //   if (classSize.match(sizeRegex)) {
+  //     return true
+  //   } else {
+  //     return false;
+  //   }
+  // }
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // Prevent default form submission behavior;
-    let dataList: (string | number)[][] = new Array(); // Initialize an empty array
+
+    let dataList: (string | number)[][] = new Array();
 
     for (let i = 0; i < totalClassrooms; i++) {
       let name = names[i];
       let age = ageRanges[i];
       let size = sizes[i];
-      dataList.push([id, name, age, size]);
+      if (!isValidAgeRange(age) || !sizeRegex.test(size)) {
+        return false;
+      }
+      dataList.push([session?.user.id, name, age, size]);
     }
     try {
       const response = await fetch(`/api/manage/configure/details`, {
@@ -53,10 +61,14 @@ export default function DetailsForm({
         body: JSON.stringify({ formBody: dataList }), // Send the entire formData here
       });
 
-      router.push("/manage/configure/details/upload");
+      router.push("/manage/configure/upload");
       router.refresh();
     } catch {}
   };
+
+  const [names, setNames] = useState(Array(totalClassrooms).fill("")); // Initialize empty array
+  const [ageRanges, setAgeRanges] = useState(Array(totalClassrooms).fill(""));
+  const [sizes, setSizes] = useState(Array(totalClassrooms).fill(""));
 
   const handleNameChange = (rowIndex: number, newValue: string) => {
     setNames((prevNames) => {
@@ -83,7 +95,7 @@ export default function DetailsForm({
   };
 
   return (
-    <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-1">
+    <>
       <div className="inline-block  text-center justify-center pb-5">
         <h1 className={title()}>Enter Individual Class Information</h1>
       </div>
@@ -120,7 +132,10 @@ export default function DetailsForm({
                     name={`age${rowIndex}`}
                     label="Ex: 12-20"
                     value={ageRanges[rowIndex]}
-                    errorMessage={!isValidAgeRange(ageRanges[rowIndex]) && "Please enter a valid age range"}
+                    errorMessage={
+                      !isValidAgeRange(ageRanges[rowIndex]) &&
+                      "Please enter a valid age range"
+                    }
                     onChange={(e) =>
                       handleAgeRangeChange(rowIndex, e.target.value)
                     }
@@ -130,7 +145,10 @@ export default function DetailsForm({
                     isRequired
                     name={`age${rowIndex}`}
                     value={ageRanges[rowIndex]}
-                    errorMessage={!isValidAgeRange(ageRanges[rowIndex]) && "Please enter a valid age range"}
+                    errorMessage={
+                      !isValidAgeRange(ageRanges[rowIndex]) &&
+                      "Please enter a valid age range"
+                    }
                     onChange={(e) =>
                       handleAgeRangeChange(rowIndex, e.target.value)
                     }
@@ -143,7 +161,10 @@ export default function DetailsForm({
                     name={`size${rowIndex}`}
                     label="Ex: 7"
                     value={sizes[rowIndex]}
-                    errorMessage={!sizeRegex.test(sizes[rowIndex]) && "Please enter a valid size"}
+                    errorMessage={
+                      !sizeRegex.test(sizes[rowIndex]) &&
+                      "Please enter a valid size"
+                    }
                     onChange={(e) => handleSizeChange(rowIndex, e.target.value)}
                   />
                 ) : (
@@ -151,7 +172,10 @@ export default function DetailsForm({
                     isRequired
                     name={`size${rowIndex}`}
                     value={sizes[rowIndex]}
-                    errorMessage={!sizeRegex.test(sizes[rowIndex]) && "Please enter a valid size"}
+                    errorMessage={
+                      !sizeRegex.test(sizes[rowIndex]) &&
+                      "Please enter a valid size"
+                    }
                     onChange={(e) => handleSizeChange(rowIndex, e.target.value)}
                   />
                 )}
@@ -163,6 +187,6 @@ export default function DetailsForm({
           </CardBody>
         </form>
       </Card>
-    </section>
+    </>
   );
 }
