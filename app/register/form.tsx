@@ -27,8 +27,7 @@ export default function Form() {
     const isPasswordEmpty = password.trim() === "";
 
     const isEmailEmpty = email.trim() === "";
-    console.log(email);
-    console.log(password);
+
     if (isPasswordEmpty || isEmailEmpty) {
       alert("Please enter a username and password");
       return;
