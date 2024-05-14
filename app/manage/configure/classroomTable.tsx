@@ -41,7 +41,9 @@ export default function ClassroomTable({
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // Prevent default form submission behavior;
 
-    let dataList: (string | number)[][] = new Array();
+    let classroomTableData: {
+      [key: number]: { classroomName: string; ageRange: string; size: number };
+    } = {};
 
     for (let i = 0; i < totalClassrooms; i++) {
       let name = names[i];
@@ -50,15 +52,26 @@ export default function ClassroomTable({
       if (!isValidAgeRange(age) || !sizeRegex.test(size)) {
         return false;
       }
-      dataList.push([session?.user.id, name, age, size]);
+
+      classroomTableData[i] = {
+        classroomName: name,
+        ageRange: age,
+        size: parseInt(size, 10),
+      }; // Parse size to number
     }
+    const formData = {
+      userID: session?.user.id,
+      classroomTable: classroomTableData,
+    };
+
+    console.log(formData);
     try {
-      const response = await fetch(`/api/manage/configure/details`, {
+      const response = await fetch(`/api/manage/configure`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ formBody: dataList }), // Send the entire formData here
+        body: JSON.stringify({ formBody: formData }), // Send the entire formData here
       });
 
       router.push("/manage/configure/upload");
