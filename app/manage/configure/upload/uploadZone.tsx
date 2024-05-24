@@ -4,7 +4,6 @@ import { Card, CardBody } from "@nextui-org/card";
 import React, { FormEvent, useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import * as XLSX from "xlsx";
-import { title } from "@/components/primitives";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
@@ -53,8 +52,7 @@ export default function MyDropzone() {
           console.log("All data points have the required fields.");
           // Transform data to desired format
           const transformedData = data.reduce((acc: any, item: any, index) => {
-            // Replace this logic with your age range calculation
-            const ageRange = `Placeholder-Age-Range`; // Replace with actual calculation
+            const ageRange = `Placeholder-Age-Range`;
             acc[index] = {
               FirstName: item["First Name"],
               LastName: item["Last Name"],
@@ -90,16 +88,6 @@ export default function MyDropzone() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // let uploadData: {
-    //   [key: number]: {
-    //     FirstName: string;
-    //     LastName: string;
-    //     Room: string;
-    //     Dob: number;
-    //     TimeSchedule: String;
-    //   };
-    // } = {};
-
     const formData = {
       userID: session?.user.id,
       uploadData: uploadedData,
@@ -115,8 +103,8 @@ export default function MyDropzone() {
         body: JSON.stringify({ formBody: formData }), // Send the entire formData here
       });
 
-      //   router.push("/manage/configure/classrooms");
-      //   router.refresh();
+      router.push("/manage/classrooms");
+      router.refresh();
     } catch {}
   };
 
