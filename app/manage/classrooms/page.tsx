@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import ClassroomTable from "./classroomTable";
 import { sql } from "@vercel/postgres";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/app/api/auth/authOptions";
 
 export default async function Classrooms() {
   const session = await getServerSession(authOptions);
@@ -10,6 +10,7 @@ export default async function Classrooms() {
     redirect("/");
   }
   const userID = session.user?.id;
+  console.log(userID);
   try {
     const response = await sql`
     SELECT classroom_details, upload_data
