@@ -7,13 +7,13 @@ import { Button } from "@nextui-org/button";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
-interface ClassroomTableProps {
+interface ClassroomDetailsProps {
   totalClassrooms: number;
 }
 
-export default function ClassroomTable({
+export default function ClassroomDetails({
   totalClassrooms,
-}: ClassroomTableProps): JSX.Element {
+}: ClassroomDetailsProps): JSX.Element {
   const router = useRouter();
   const { data: session } = useSession();
   const ageRangeRegex = /^(\d+)-(\d+)$/;
@@ -30,20 +30,13 @@ export default function ClassroomTable({
     }
   };
 
-  // const isValidClassSize = (classSize: string) => {
-  //   if (classSize.match(sizeRegex)) {
-  //     return true
-  //   } else {
-  //     return false;
-  //   }
-  // }
-
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); // Prevent default form submission behavior;
+    e.preventDefault();
 
-    let classroomTableData: {
+    let classroomDetails: {
+      totalClasses: number;
       [key: number]: { classroomName: string; ageRange: string; size: number };
-    } = {};
+    } = { totalClasses: totalClassrooms };
 
     for (let i = 0; i < totalClassrooms; i++) {
       let name = names[i];
@@ -53,7 +46,7 @@ export default function ClassroomTable({
         return false;
       }
 
-      classroomTableData[i] = {
+      classroomDetails[i] = {
         classroomName: name,
         ageRange: age,
         size: parseInt(size, 10),
@@ -61,17 +54,16 @@ export default function ClassroomTable({
     }
     const formData = {
       userID: session?.user.id,
-      classroomTable: classroomTableData,
+      classroomDetails: classroomDetails,
     };
 
-    console.log(formData);
     try {
       const response = await fetch(`/api/manage/configure`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ formBody: formData }), // Send the entire formData here
+        body: JSON.stringify({ formBody: formData }),
       });
 
       router.push("/manage/configure/upload");
@@ -79,7 +71,7 @@ export default function ClassroomTable({
     } catch {}
   };
 
-  const [names, setNames] = useState(Array(totalClassrooms).fill("")); // Initialize empty array
+  const [names, setNames] = useState(Array(totalClassrooms).fill(""));
   const [ageRanges, setAgeRanges] = useState(Array(totalClassrooms).fill(""));
   const [sizes, setSizes] = useState(Array(totalClassrooms).fill(""));
 

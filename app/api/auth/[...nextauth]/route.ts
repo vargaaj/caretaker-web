@@ -1,10 +1,9 @@
-import NextAuth from "next-auth";
+import NextAuth, { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcrypt";
 import { sql } from "@vercel/postgres";
-import { User } from "next-auth/core/types";
 
-const handler = NextAuth({
+export const authOptions: AuthOptions = {
   session: {
     strategy: "jwt",
   },
@@ -40,10 +39,10 @@ const handler = NextAuth({
   ],
   callbacks: {
     async jwt({ token, user, session }) {
+      console.log("jwt callback", { token, user, session });
       if (user) {
         return {
           ...token,
-          id: user.id,
           role: user.role,
         };
       }
@@ -53,13 +52,14 @@ const handler = NextAuth({
       return {
         ...session,
         user: {
-          id: token.id,
-          email: token.email,
+          ...session.user,
+          id: token.sub,
           role: token.role,
         },
       };
     },
   },
-});
+};
 
+const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };
