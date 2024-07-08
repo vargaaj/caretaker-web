@@ -15,67 +15,110 @@ const requiredFields = [
   "Time Schedule",
 ];
 
-export default function MyDropzone() {
+interface ClassroomDetails {
+  size: number;
+  ageRange: string;
+  classroomName: string;
+}
+
+interface ClassroomDetailsProp {
+  classroomDetailsData: ClassroomDetails[];
+}
+
+export default function MyDropzone({
+  classroomDetailsData,
+}: ClassroomDetailsProp): JSX.Element {
   const [uploadStatus, setUploadStatus] = useState("");
   const [uploadedData, setUploadedData] = useState<unknown | undefined>();
 
   const router = useRouter();
   const { data: session } = useSession();
 
-  const onDrop = useCallback((acceptedFiles: any) => {
-    acceptedFiles.forEach((file: Blob) => {
-      const reader = new FileReader();
+  const onDrop = useCallback(
+    (acceptedFiles: any) => {
+      acceptedFiles.forEach((file: Blob) => {
+        const reader = new FileReader();
 
-      reader.onabort = () => console.log("file reading was aborted");
-      reader.onerror = () => console.log("file reading has failed");
-      reader.onload = () => {
-        const binaryStr = reader.result;
+        reader.onabort = () => console.log("file reading was aborted");
+        reader.onerror = () => console.log("file reading has failed");
+        reader.onload = () => {
+          const binaryStr = reader.result;
 
-        // Convert binary string to workbook
-        const workbook = XLSX.read(binaryStr, { type: "binary" });
+          // Convert binary string to workbook
+          const workbook = XLSX.read(binaryStr, { type: "binary" });
 
-        // Get the first sheet
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
+          // Get the first sheet
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
 
-        // Convert sheet data to JSON
-        const data = XLSX.utils.sheet_to_json(worksheet);
+          // Convert sheet data to JSON
+          const data = XLSX.utils.sheet_to_json(worksheet);
 
-        console.log(data);
+          console.log(data);
 
-        // Check if every data point has the required fields
-        const isValid = data.every((dataPoint: any) => {
-          return requiredFields.every((field) => field in dataPoint);
-        });
+          // Check if every data point has the required fields
+          const isValid = data.every((dataPoint: any) => {
+            return requiredFields.every((field) => field in dataPoint);
+          });
 
-        if (isValid) {
-          console.log("All data points have the required fields.");
-          // Transform data to desired format
-          const transformedData = data.reduce((acc: any, item: any, index) => {
-            const ageRange = `Placeholder-Age-Range`;
-            acc[index] = {
-              FirstName: item["First Name"],
-              LastName: item["Last Name"],
-              Room: item.Room,
-              Dob: item.Dob,
-              TimeSchedule: item["Time Schedule"],
-            };
-            return acc;
-          }, {} as { [key: number]: { FirstName: string; LastName: string; Room: string; Dob: number; TimeSchedule: string } });
+          if (isValid) {
+            console.log("All data points have the required fields.");
 
-          // Update uploadData with transformed data
-          setUploadedData(transformedData);
-          setUploadStatus("success");
-        } else {
-          console.log("Some data points are missing required fields.");
-          alert(
-            "The uploaded file is missing required fields. Please ensure the excel file includes columns: First Name, Last Name, Room, Dob, and Time Schedule. Also, ensure each child has an input for each column. For example: \n First Name: Clara \n Last Name: Herbert \n Room: Infant 1 \n Dob: 08/24/2023 \n Time Schedule: M, T, W, Th, F"
-          );
-        }
-      };
-      reader.readAsBinaryString(file);
-    });
-  }, []);
+            // Check if every room matches one of the classroom names
+            const validRooms = classroomDetailsData.map(
+              (item) => item.classroomName
+            );
+            const roomsMatch = data.every((dataPoint: any) =>
+              validRooms.includes(dataPoint.Room)
+            );
+
+            if (roomsMatch) {
+              console.log("All rooms match the classroom names.");
+
+              // Transform data to desired format
+              const transformedData = data.reduce(
+                (acc: any, item: any, index) => {
+                  acc[index] = {
+                    FirstName: item["First Name"],
+                    LastName: item["Last Name"],
+                    Room: item.Room,
+                    Dob: item.Dob,
+                    TimeSchedule: item["Time Schedule"],
+                  };
+                  return acc;
+                },
+                {} as {
+                  [key: number]: {
+                    FirstName: string;
+                    LastName: string;
+                    Room: string;
+                    Dob: number;
+                    TimeSchedule: string;
+                  };
+                }
+              );
+
+              // Update uploadData with transformed data
+              setUploadedData(transformedData);
+              setUploadStatus("success");
+            } else {
+              console.log("Some rooms do not match the classroom names.");
+              alert(
+                "Some rooms in the uploaded file do not match the classroom names. Please ensure that all rooms correspond to the available classroom names."
+              );
+            }
+          } else {
+            console.log("Some data points are missing required fields.");
+            alert(
+              "The uploaded file is missing required fields. Please ensure the excel file includes columns: First Name, Last Name, Room, Dob, and Time Schedule. Also, ensure each child has an input for each column. For example: \n First Name: Clara \n Last Name: Herbert \n Room: Infant 1 \n Dob: 08/24/2023 \n Time Schedule: M, T, W, Th, F"
+            );
+          }
+        };
+        reader.readAsBinaryString(file);
+      });
+    },
+    [classroomDetailsData]
+  );
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
@@ -105,7 +148,9 @@ export default function MyDropzone() {
 
       router.push("/manage/classrooms");
       router.refresh();
-    } catch {}
+    } catch (error) {
+      console.error("Error during form submission:", error);
+    }
   };
 
   return (
@@ -141,9 +186,7 @@ export default function MyDropzone() {
             <Button type="submit" color="primary" className="mt-6 w-full">
               Save
             </Button>
-          ) : (
-            <></>
-          )}
+          ) : null}
         </form>
       </Card>
     </section>
